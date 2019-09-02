@@ -1,2 +1,2 @@
 let msg = "test";
-console.log(msg);
+console.log(msg); //test

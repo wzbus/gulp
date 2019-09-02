@@ -1,7 +1,8 @@
 import gulp from 'gulp';
 import babel from 'gulp-babel';
+import cached from "gulp-cached";
 import autoprefixer from 'gulp-autoprefixer';
-import minify from 'gulp-minify-css';
+import cleanCss from 'gulp-clean-css';
 import uglify from 'gulp-uglify';
 import rev from 'gulp-rev';
 import revCollector from 'gulp-rev-collector';
@@ -11,11 +12,17 @@ import del from 'del';
 
 gulp.task('css', () => {
   return gulp.src('app/css/**/*.css')
+    .pipe(cached('css'))
     .pipe(autoprefixer({
       overrideBrowserslist: ['> 5%'],
       cascade: false
     }))
-    .pipe(minify())
+    .pipe(cleanCss({
+      advanced: false,
+      compatibility: 'ie8',
+      keepBreaks: false,
+      keepSpecialComments: '*'
+    }))
     .pipe(rev())
     .pipe(gulp.dest('dist/css'))
     .pipe(rev.manifest())
@@ -24,6 +31,7 @@ gulp.task('css', () => {
 
 gulp.task('js', function () {
   return gulp.src('app/js/**/*.js')
+    .pipe(cached('js'))
     .pipe(babel()) 
     .pipe(uglify({
       mangle: false
@@ -36,12 +44,14 @@ gulp.task('js', function () {
 
 gulp.task('pic', function () {
   return gulp.src('app/pic/**/*')
+    .pipe(cached('pic'))
     .pipe(imagemin())
     .pipe(gulp.dest('dist/pic'));
 });
 
 gulp.task('html', function() {
   return gulp.src(['rev/**/*.json', 'app/*.html'])
+    .pipe(cached('html'))
     .pipe(revCollector({
       replaceReved: true
       // dirReplacements: {
@@ -65,6 +75,7 @@ gulp.task('watch', function() {
   gulp.watch('app/*.html', gulp.series('html'));
   gulp.watch('app/css/**/*.css', gulp.series('css'));
   gulp.watch('app/js/**/*.js', gulp.series('js'));
+  gulp.watch('app/pic/**/*', gulp.series('pic'));
   gulp.watch('dist/**/*', gulp.series('reload'));
 });
  
